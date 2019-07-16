@@ -23,9 +23,6 @@ function gequip.register_type(name, def)
 	}, def)
 
 	def.defaults = table.combine({
-		-- How many times can this equipment take damage before breaking?
-		-- 0 = infinite.
-		uses = 200,
 	}, def.defaults)
 
 	minetest.register_on_player_inventory_action(function(player, action, inv, info)

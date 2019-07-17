@@ -74,10 +74,10 @@ function gequip.register_action(name, def)
 end
 
 -- Get the eqdef of a stack.
-function gequip.get_eqdef(stack)
+function gequip.get_eqdef(stack, skip_meta)
 	local def = stack:get_definition()
 	local typedef = gequip.types[def._eqtype]
-	local metadef = stack:get_meta():contains("eqdef") and minetest.deserialize(stack:get_meta():get_string("eqdef")) or {}
+	local metadef = (stack:get_meta():contains("eqdef") and not skip_meta) and minetest.deserialize(stack:get_meta():get_string("eqdef")) or {}
 
 	-- Combine slot defaults, item defition defaults, and item meta eqdef.
 	return table.combine(typedef.defaults, def._eqdef or {}, metadef)

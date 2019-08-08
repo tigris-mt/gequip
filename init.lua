@@ -4,7 +4,7 @@ gequip.types = {}
 
 -- Register a type of equipment.
 function gequip.register_type(name, def)
-	def = table.combine({
+	def = b.t.combine({
 		-- Human readable description.
 		description = "?",
 
@@ -19,7 +19,7 @@ function gequip.register_type(name, def)
 		defaults = {},
 	}, def)
 
-	def.defaults = table.combine({
+	def.defaults = b.t.combine({
 	}, def.defaults)
 
 	minetest.register_on_player_inventory_action(function(player, action, inv, info)
@@ -62,7 +62,7 @@ end)
 gequip.actions = {}
 
 function gequip.register_action(name, def)
-	gequip.actions[name] = table.combine({
+	gequip.actions[name] = b.t.combine({
 		-- State is a table for arbitrary data storage between adds.
 		-- State is shared between all actions, use a unique sub key.
 		init = function(state) end,
@@ -87,13 +87,13 @@ function gequip.get_eqdef(stack, skip_meta)
 	local def = stack:get_definition()
 	local typedef = gequip.types[def._eqtype]
 
-	local eqdef_static = table.combine(typedef.defaults, def._eqdef or {})
+	local eqdef_static = b.t.combine(typedef.defaults, def._eqdef or {})
 	for _,func in ipairs(gequip.eqdef_inits) do
 		func(eqdef_static, stack)
 	end
 
 	local metadef = (stack:get_meta():contains("eqdef") and not skip_meta) and minetest.deserialize(stack:get_meta():get_string("eqdef")) or {}
-	return table.combine(table.copy(eqdef_static), metadef)
+	return b.t.combine(table.copy(eqdef_static), metadef)
 end
 
 -- Apply all equipment to the player.

@@ -12,7 +12,7 @@ function gequip.register_type(name, def)
 		slots = 1,
 
 		-- Inventory list name.
-		list_name = "gequip_" .. name,
+		list_name = "gequip:list_" .. name,
 
 		-- Default definition of individual equipment.
 		-- Defaults below.
@@ -121,3 +121,48 @@ function gequip.refresh(player)
 		action.apply(state, player)
 	end
 end
+
+gequip.DELEGATE = "gequip:special_delegate"
+
+minetest.register_on_joinplayer(function(player)
+	player:get_inventory():set_size(gequip.DELEGATE, 1)
+	-- Ensure delegate inventory is clear.
+	player:get_inventory():set_list(gequip.DELEGATE, {})
+end)
+
+minetest.register_allow_player_inventory_action(function(player, action, inv, info)
+	local stack
+	if action == "move" and info.to_list == gequip.DELEGATE and info.from_list ~= gequip.DELEGATE then
+		stack = ItemStack(player:get_inventory():get_list(info.from_list)[info.from_index])
+		stack:set_count(info.count)
+	elseif action == "put" and info.listname == gequip.DELEGATE then
+		stack = info.stack
+	else
+		return nil
+	end
+
+	for type,def in pairs(gequip.types) do
+		if player:get_inventory():room_for_item(def.list_name, stack) and (def.allow_player_inventory_action(player, "put", player:get_inventory(), {stack = stack, listname = def.list_name}) or 1) > 0 then
+			return 1
+		end
+	end
+
+	return 0
+end)
+
+minetest.register_on_player_inventory_action(function(player, action, inv, info)
+	local stack
+	if action == "move" and info.to_list == gequip.DELEGATE then
+		stack = ItemStack(player:get_inventory():get_list(info.to_list)[info.to_index])
+		stack:set_count(info.count)
+	elseif action == "put" and info.listname == gequip.DELEGATE then
+		stack = info.stack
+	else
+		return
+	end
+
+	local def = gequip.types[stack:get_definition()._eqtype]
+	player:get_inventory():set_list(gequip.DELEGATE, {})
+	player:get_inventory():add_item(def.list_name, stack)
+	def.on_player_inventory_action(player, "put", player:get_inventory(), {stack = stack, listname = def.list_name})
+end)

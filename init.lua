@@ -22,14 +22,14 @@ function gequip.register_type(name, def)
 	def.defaults = b.t.combine({
 	}, def.defaults)
 
-	minetest.register_on_player_inventory_action(function(player, action, inv, info)
+	function def.on_player_inventory_action(player, action, inv, info)
 		if (action == "move" and (info.to_list == def.list_name or info.from_list == def.list_name)) or (action == "put" and info.listname == def.list_name) then
 			gequip.refresh(player)
 			return
 		end
-	end)
+	end
 
-	minetest.register_allow_player_inventory_action(function(player, action, inv, info)
+	function def.allow_player_inventory_action(player, action, inv, info)
 		local stack
 		if action == "move" and info.to_list == def.list_name and info.from_list ~= def.list_name then
 			stack = ItemStack(player:get_inventory():get_list(info.from_list)[info.from_index])
@@ -46,7 +46,10 @@ function gequip.register_type(name, def)
 		end
 
 		return nil
-	end)
+	end
+
+	minetest.register_on_player_inventory_action(def.on_player_inventory_action)
+	minetest.register_allow_player_inventory_action(def.allow_player_inventory_action)
 
 	gequip.types[name] = def
 end

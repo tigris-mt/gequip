@@ -99,24 +99,34 @@ function gequip.get_eqdef(stack, skip_meta)
 	return b.t.combine(table.copy(eqdef_static), metadef)
 end
 
--- Apply all equipment to the player.
-function gequip.refresh(player)
+-- Compile a gequip state from a list of ItemStacks.
+function gequip.compile(items)
 	local state = {}
 	for _,action in pairs(gequip.actions) do
 		action.init(state)
 	end
 
-	for _,type in pairs(gequip.types) do
-		for _,stack in ipairs(player:get_inventory():get_list(type.list_name)) do
-			if stack:get_count() > 0 then
-				local eqdef = gequip.get_eqdef(stack)
-				for _,action in pairs(gequip.actions) do
-					action.add(state, eqdef, stack)
-				end
+	for _,stack in ipairs(items) do
+		if stack:get_count() > 0 then
+			local eqdef = gequip.get_eqdef(stack)
+			for _,action in pairs(gequip.actions) do
+				action.add(state, eqdef, stack)
 			end
 		end
 	end
 
+	return state
+end
+
+-- Apply all equipment to the player.
+function gequip.refresh(player)
+	local items = {}
+	for _,type in pairs(gequip.types) do
+		for _,stack in ipairs(player:get_inventory():get_list(type.list_name)) do
+			table.insert(items, stack)
+		end
+	end
+	local state = gequip.compile(items)
 	for _,action in pairs(gequip.actions) do
 		action.apply(state, player)
 	end

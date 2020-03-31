@@ -118,14 +118,21 @@ function gequip.compile(items)
 	return state
 end
 
--- Apply all equipment to the player.
-function gequip.refresh(player)
+-- Get a list of all items that should apply gequip actions to the player.
+-- Override in other mods to provide more slots.
+function gequip.get_items(player)
 	local items = {}
 	for _,type in pairs(gequip.types) do
 		for _,stack in ipairs(player:get_inventory():get_list(type.list_name)) do
 			table.insert(items, stack)
 		end
 	end
+	return items
+end
+
+-- Apply all equipment to the player.
+function gequip.refresh(player)
+	local items = gequip.get_items(player)
 	local state = gequip.compile(items)
 	for _,action in pairs(gequip.actions) do
 		action.apply(state, player)

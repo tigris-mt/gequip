@@ -183,3 +183,15 @@ minetest.register_on_player_inventory_action(function(player, action, inv, info)
 	player:get_inventory():add_item(def.list_name, stack)
 	def.on_player_inventory_action(player, "put", player:get_inventory(), {stack = stack, listname = def.list_name})
 end)
+
+-- On use callback, will equip item if possible when item is used.
+function gequip.on_use(itemstack, player)
+	local def = itemstack:get_definition()
+	local type_def = gequip.types[def._eqtype]
+	if type_def and player:get_inventory():room_for_item(type_def.list_name, itemstack) and (type_def.allow_player_inventory_action(player, "put", player:get_inventory(), {stack = itemstack, listname = type_def.list_name}) or 1) > 0 then
+		player:get_inventory():add_item(type_def.list_name, itemstack)
+		type_def.on_player_inventory_action(player, "put", player:get_inventory(), {stack = itemstack, listname = type_def.list_name})
+		itemstack:take_item()
+	end
+	return itemstack
+end

@@ -124,7 +124,9 @@ function gequip.get_items(player)
 	local items = {}
 	for _,type in pairs(gequip.types) do
 		for _,stack in ipairs(player:get_inventory():get_list(type.list_name)) do
-			table.insert(items, stack)
+			if not stack:is_empty() then
+				table.insert(items, stack)
+			end
 		end
 	end
 	return items

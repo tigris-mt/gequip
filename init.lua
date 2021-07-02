@@ -23,7 +23,7 @@ function gequip.register_type(name, def)
 	}, def.defaults)
 
 	function def.on_player_inventory_action(player, action, inv, info)
-		if (action == "move" and (info.to_list == def.list_name or info.from_list == def.list_name)) or (action == "put" and info.listname == def.list_name) then
+		if (action == "move" and (info.to_list == def.list_name or info.from_list == def.list_name)) or (action == "put" and info.listname == def.list_name) or (action == "take" and info.listname == def.list_name) then
 			gequip.refresh(player)
 			return
 		end
